@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Emoji Fruit Cut Master - Final V3</title>
+    <title>Emoji Fruit Cut Master - Spawn Combo V1</title>
     <style>
         /* --- Basic Reset & Fullscreen --- */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif; }
@@ -42,14 +42,14 @@
         /* Visual Border for Gameplay Area */
         #game-border { position: absolute; top: 5px; left: 5px; right: 5px; bottom: 5px; border: 5px dashed rgba(255, 255, 255, 0.6); z-index: 2; pointer-events: none; border-radius: 10px; }
 
-        /* Start Game Banner (MODIFIED) */
+        /* Start Game Banner */
         #start-screen {
             position: absolute; top: 50%; left: 50%;
             transform: translate(-50%, -50%); /* Keeps it centered */
             z-index: 15;
             background: linear-gradient(145deg, #4a4e69, #22223b); /* Darker gradient */
             color: #f2e9e4; /* Lighter text */
-            padding: 40px 60px; /* More padding */
+            padding: clamp(25px, 6vw, 40px) clamp(40px, 8vw, 60px); /* Responsive padding */
             border-radius: 30px; /* More rounded */
             border: none; /* Remove old border */
             text-align: center; cursor: pointer;
@@ -59,13 +59,13 @@
             display: none; /* Hidden initially, shown by JS */
          }
         #start-screen h2 {
-            font-size: clamp(2.4em, 8vw, 4em); /* Larger & Bold */
-            margin-bottom: 20px;
+            font-size: clamp(2.2em, 8vw, 3.8em); /* Slightly adjusted */
+            margin-bottom: clamp(15px, 4vw, 20px); /* Responsive margin */
             text-shadow: 3px 3px 6px rgba(0,0,0,0.6);
             font-weight: bold; /* Explicitly bold */
          }
         #start-screen p {
-            font-size: clamp(1.2em, 4vw, 1.6em); /* Slightly larger */
+            font-size: clamp(1.1em, 4vw, 1.5em); /* Slightly adjusted */
              text-shadow: 2px 2px 5px rgba(0,0,0,0.5);
              font-weight: normal; /* Not bold for contrast */
          }
@@ -75,13 +75,52 @@
                         inset 0 3px 7px rgba(0, 0, 0, 0.2);
         }
 
-        /* Game UI (Score, Lives, etc.) */
-        .game-ui { position: absolute; top: 15px; left: 15px; right: 15px; display: flex; justify-content: space-between; align-items: center; z-index: 5; font-size: clamp(1.2em, 4vw, 1.8em); color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.7); }
-        .game-ui > div { background: rgba(0,0,0,0.4); padding: 8px 18px; border-radius: 15px; display: flex; align-items: center; }
-        .game-ui button { font-size: 0.7em; padding: 10px 15px; margin-left: 10px; }
-        #score-display span { font-weight: bold; margin-left: 8px; min-width: 40px; display: inline-block; text-align: right;}
-        #lives-display span { margin-left: 8px; font-size: 1.1em; letter-spacing: 3px; color: #ff4757;}
-        #info-toggle-btn { background-color: #ff9f43; font-size: 1.1em !important; padding: 8px 10px !important; width: 45px; height: 45px; display:flex; justify-content:center; align-items:center; font-weight:bold; } /* Info icon button */
+        /* Game UI (Score, Lives, etc.) - UPDATED */
+        .game-ui {
+            position: absolute; top: 15px; left: 15px; right: 15px;
+            display: flex; justify-content: space-between; align-items: center;
+            z-index: 5;
+            font-size: clamp(1.1em, 3.5vw, 1.6em); /* Slightly adjusted base size for better fit */
+            color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+            pointer-events: none; /* Allow clicks/taps to pass through UI overlay */
+        }
+        .game-ui > div { /* Child divs containing Score/Highscore/Lives/Controls */
+            background: rgba(0,0,0,0.4);
+            padding: 8px clamp(10px, 3vw, 18px); /* Responsive padding */
+            border-radius: 15px;
+            display: flex; align-items: center;
+            pointer-events: auto; /* Enable pointer events ONLY for the UI elements */
+        }
+        /* Specific UI Groups */
+        #score-display, #highscore-display { /* Current Score / High Score */
+            /* display: none; Initially hidden via CSS */
+        }
+        #score-display span, #highscore-display span {
+            font-weight: bold; margin-left: 8px; min-width: 40px; display: inline-block; text-align: right;
+        }
+        #lives-display {
+             /* display: none; Initially hidden via CSS */
+        }
+        #lives-display span {
+             margin-left: 8px; font-size: 1.1em; letter-spacing: 3px; color: #ff4757;
+        }
+        #game-controls-group {
+            gap: clamp(5px, 1.5vw, 10px); /* Space between buttons */
+            padding: 5px clamp(8px, 2vw, 10px); /* Slightly smaller padding for the button group */
+            /* display: flex; Initially shown via CSS */
+        }
+        #game-controls-group button { /* Style buttons within the group */
+            font-size: clamp(0.9em, 2.5vw, 1.1em); /* Responsive font size for icons */
+            padding: 8px 10px;
+            margin-left: 0; /* Remove default margin */
+            min-width: 40px; height: 40px; /* Consistent size */
+            display: flex; justify-content: center; align-items: center;
+            pointer-events: auto; /* Ensure buttons are clickable */
+            cursor: pointer; /* Explicitly set cursor */
+        }
+        #info-toggle-btn { /* Specific style for info button */
+            background-color: #ff9f43; font-weight:bold;
+        }
 
         /* Game Over Screen */
         #game-over-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); /* Darker overlay */ display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 20; color: white; text-align: center; font-size: 1.5em; padding: 20px; opacity: 0; animation: fadeIn 0.5s ease-out forwards; }
@@ -156,6 +195,13 @@
         @keyframes bounceIn { 0% { transform: scale(0.5); opacity: 0; } 60% { transform: scale(1.1); opacity: 1; } 80% { transform: scale(0.95); } 100% { transform: scale(1); } }
         @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.7; } }
 
+        /* --- Visibility Control --- */
+        /* Default: Show HighScore and Controls, Hide Score and Lives */
+        #score-display { display: none; }
+        #lives-display { display: none; }
+        #highscore-display { display: flex; } /* Use flex to align icon/text */
+        #game-controls-group { display: flex; } /* Use flex for button layout */
+
     </style>
 </head>
 <body>
@@ -194,9 +240,14 @@
             <p>Tap to Start</p>
         </div>
 
+        <!-- UPDATED Game UI Structure -->
         <div class="game-ui">
+             <!-- Left Side: Shows EITHER High Score OR Current Score -->
+             <div id="highscore-display">High Score: <span>0</span></div>
              <div id="score-display">Score: <span>0</span></div>
-             <div> <!-- Group buttons -->
+
+             <!-- Right Side: Shows EITHER Controls OR Lives -->
+             <div id="game-controls-group"> <!-- Buttons shown before game starts -->
                  <button id="leaderboard-btn" class="game-button btn-secondary" title="Leaderboard">🏆</button>
                  <button id="info-toggle-btn" class="game-button" title="Info">❓</button> <!-- Info button -->
                  <button id="logout-btn" class="game-button btn-danger" title="Logout">🚪</button>
@@ -218,7 +269,7 @@
 
     </div>
 
-     <!-- Info Panel Modal (Replaces Chat) -->
+     <!-- Info Panel Modal -->
     <div id="info-modal">
         <div id="info-container">
             <div id="info-header">
@@ -229,9 +280,10 @@
                 <h4>How to Play:</h4>
                 <ul>
                     <li>Swipe across the screen to slice the fruits!</li>
-                    <li>Slice multiple fruits in one swipe for combos and bonus points.</li>
+                    <li>Slice multiple fruits in one swipe for points.</li> <!-- Updated text -->
                     <li>Avoid slicing the bombs 💣, or it's game over!</li>
                     <li>You lose a life ❤️ if you miss a fruit.</li>
+                    <li>Look out for fruit bundles spawning together!</li> <!-- Updated text -->
                     <li>Try to get the highest score!</li>
                 </ul>
                 <div class="creator-credit">Created By Dheeraj ❤️</div>
@@ -276,8 +328,13 @@
         const signupPasswordInput = document.getElementById('signup-password');
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        const scoreDisplay = document.querySelector('#score-display span');
-        const livesDisplay = document.querySelector('#lives-display span');
+        const scoreDisplay = document.getElementById('score-display');
+        const scoreDisplaySpan = document.querySelector('#score-display span');
+        const highscoreDisplay = document.getElementById('highscore-display');
+        const highscoreDisplaySpan = document.querySelector('#highscore-display span');
+        const livesDisplay = document.getElementById('lives-display');
+        const livesDisplaySpan = document.querySelector('#lives-display span');
+        const gameControlsGroup = document.getElementById('game-controls-group');
         const startScreen = document.getElementById('start-screen');
         const gameOverScreen = document.getElementById('game-over-screen');
         const finalScoreDisplay = document.getElementById('final-score');
@@ -301,50 +358,67 @@
         let gameState = 'loading'; let score = 0; let lives = 3; let gameObjects = []; let particles = []; let scorePopups = [];
         let swipePath = []; let isSwiping = false; let animationFrameId = null; let spawnTimeoutId = null; let username = null;
         let userHighScore = 0; let leaderboardData = []; let lastSwipeTime = 0; let audioInitialized = false; let hasInteracted = false;
-        let currentCombo = 0;
+        // REMOVED: let currentCombo = 0;
 
         // --- Constants ---
         const FRUITS = ['🍎', '🍌', '🍓', '🍉', '🥝', '🍊', '🍇', '🍍', '🥭', '🍑', '🥥', '🍒'];
-        const BOMB_EMOJI = '💣'; const FRUIT_BASE_SCORE = 10; const COMBO_BONUS_MULTIPLIER = 5;
+        const BOMB_EMOJI = '💣';
+        const FRUIT_BASE_SCORE = 10;
+        // REMOVED: const COMBO_BONUS_MULTIPLIER = 5;
 
-        // --- ADJUSTABLE SPEED/PHYSICS CONSTANTS (MODIFIED) ---
-        // Lower values = slower/lower jumps, Higher values = faster/higher jumps
-        const INITIAL_VY_MIN_FACTOR = 0.010; // Factor of canvas height for min initial vertical velocity (Was 0.015)
-        const INITIAL_VY_MAX_FACTOR = 0.014; // Factor of canvas height for max initial vertical velocity (Was 0.020)
-        // Affects how quickly objects fall back down
-        const GRAVITY_FACTOR = 0.045;         // Base gravity value (Was 0.05)
-        // --- END ADJUSTABLE CONSTANTS ---
+        // --- ADJUSTABLE SPEED/PHYSICS CONSTANTS ---
+        const INITIAL_VY_MIN_FACTOR = 0.010;
+        const INITIAL_VY_MAX_FACTOR = 0.014;
+        const GRAVITY_FACTOR = 0.045;
 
+        // --- SPAWN CONSTANTS ---
         const INITIAL_SPAWN_RATE = 1400; const MIN_SPAWN_RATE = 450; const SPAWN_RATE_DECREASE_PER_100_SCORE = 50;
-        const BOMB_CHANCE = 0.16; const COMBO_CHANCE = 0.15; const MAX_COMBO_SIZE = 4; const MIN_COMBO_SIZE = 2;
+        const BOMB_CHANCE = 0.16; // Chance for a bomb ONLY on single spawns
+        const COMBO_CHANCE = 0.18; // Chance for a combo spawn event (increased slightly)
+        const MIN_COMBO_SPAWN_COUNT = 4; // Min fruits in a combo spawn
+        const MAX_COMBO_SPAWN_COUNT = 7; // Max fruits in a combo spawn
+
+        // --- VISUAL/INPUT CONSTANTS ---
         const SWIPE_THICKNESS = 12; const SWIPE_COLOR = 'rgba(255, 255, 255, 0.8)'; const MAX_SWIPE_POINTS = 25;
         const PARTICLE_COUNT = 3; const PARTICLE_LIFE = 40;
 
         // --- BACKGROUND STYLES ---
-        const DEFAULT_CANVAS_BACKGROUND = 'linear-gradient(to bottom, #87CEEB 0%, #a6c1ee 60%, #90EE90 100%)'; // Original blue/green
-        const ACTIVE_GAME_BACKGROUND = 'linear-gradient(to bottom, #6b4f40 0%, #a07e68 60%, #8b735b 100%)'; // Darker, brownish wood-like
+        const DEFAULT_CANVAS_BACKGROUND = 'linear-gradient(to bottom, #87CEEB 0%, #a6c1ee 60%, #90EE90 100%)';
+        const ACTIVE_GAME_BACKGROUND = 'linear-gradient(to bottom, #6b4f40 0%, #a07e68 60%, #8b735b 100%)';
 
         // --- Utility Functions ---
         function getRandom(min, max) { return Math.random() * (max - min) + min; }
         function getRandomInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 
         function showView(viewId) {
-            console.log(`Switching view to: ${viewId}`); gameState = viewId;
+            console.log(`Switching view to: ${viewId}`);
+            const previousState = gameState;
+            gameState = viewId;
             Object.values(views).forEach(view => view.classList.remove('active'));
             if (views[viewId]) {
                 views[viewId].classList.add('active');
                 if (viewId === 'game') {
                     resizeCanvas();
-                    // Show start screen only if game isn't already over or running
-                    if (!animationFrameId && (!gameOverScreen.style.display || gameOverScreen.style.display === 'none')) {
+                    if (previousState !== 'playing' && previousState !== 'gameover') {
+                        resetGame();
+                        startScreen.style.display = 'block';
+                    } else if (previousState === 'gameover'){
+                        resetGame();
                         startScreen.style.display = 'block';
                     }
                 } else {
-                    stopGameLoop(); // Stop game if leaving game view
-                    startScreen.style.display = 'none'; // Hide start screen if leaving game view
-                    infoModal.classList.remove('active'); // Close info modal if open
+                    stopGameLoop();
+                    startScreen.style.display = 'none';
+                    infoModal.classList.remove('active');
+                    if(previousState === 'playing') {
+                        resetGame();
+                    }
                 }
-            } else { console.error("View not found:", viewId); views.auth.classList.add('active'); gameState = 'auth'; }
+            } else {
+                console.error("View not found:", viewId);
+                views.auth.classList.add('active');
+                gameState = 'auth';
+            }
         }
 
         function updateAuthMessage(type, message, isError = true) {
@@ -358,247 +432,401 @@
 
         // --- Audio Handling ---
         function firstInteractionHandler() {
-             if (hasInteracted) return; console.log("First user interaction detected."); hasInteracted = true; initAudio();
-             document.body.removeEventListener('mousedown', firstInteractionHandler); document.body.removeEventListener('touchstart', firstInteractionHandler);
+             if (hasInteracted) return;
+             console.log("First user interaction detected.");
+             hasInteracted = true;
+             initAudio();
+             document.body.removeEventListener('mousedown', firstInteractionHandler, { capture: true });
+             document.body.removeEventListener('touchstart', firstInteractionHandler, { capture: true });
         }
         document.body.addEventListener('mousedown', firstInteractionHandler, { once: true, capture: true });
         document.body.addEventListener('touchstart', firstInteractionHandler, { once: true, capture: true });
+
         function initAudio() {
-             if (audioInitialized || !hasInteracted) return; console.log("Attempting audio init..."); let unlockSuccess = false;
-             try { Object.values(sounds).forEach(s => {s.volume=0; s.play().catch(()=>{}); s.pause(); s.currentTime=0; s.volume=0.6;}); const AC=window.AudioContext||window.webkitAudioContext; if(AC){const c=new AC(); if(c.state==='suspended'){c.resume().then(()=>{console.log("AudioContext resumed."); unlockSuccess=true;}).catch(e=>console.warn("Resume failed:",e));}else{unlockSuccess=true;}}else{unlockSuccess=true;} if(unlockSuccess){audioInitialized=true; console.log("Audio initialized.");}else{console.warn("Audio unlock failed.");}}catch(e){console.error("Audio init error:",e);}
+             if (audioInitialized || !hasInteracted) return;
+             console.log("Attempting audio init...");
+             let unlockSuccess = false;
+             try {
+                 Object.values(sounds).forEach(s => {
+                    s.volume = 0; s.play().catch(()=>{}); s.pause(); s.currentTime = 0; s.volume = 0.6;
+                 });
+                 const AC = window.AudioContext || window.webkitAudioContext;
+                 if (AC) {
+                    const ctx = new AC();
+                    if (ctx.state === 'suspended') {
+                        ctx.resume().then(() => { unlockSuccess = true; console.log("AudioContext resumed."); }).catch(e => console.warn("Resume failed:", e));
+                    } else { unlockSuccess = true; }
+                 } else { unlockSuccess = true; }
+                 if (unlockSuccess) { audioInitialized = true; console.log("Audio initialized."); }
+                 else { console.warn("Audio unlock failed."); }
+             } catch(e) { console.error("Audio init error:", e); }
         }
         function playSound(soundName) {
-             if (!audioInitialized || !hasInteracted) return; const s=sounds[soundName]; if(s){s.pause();s.currentTime=0;s.play().catch(e=>console.error(`Play sound "${soundName}" Error:`,e.message));}else{console.warn(`Sound not found: ${soundName}`);}
+             if (!audioInitialized || !hasInteracted) return;
+             const s = sounds[soundName];
+             if (s) { s.pause(); s.currentTime = 0; s.play().catch(e => console.error(`Play sound "${soundName}" Error:`, e.message)); }
+             else { console.warn(`Sound not found: ${soundName}`); }
         }
         function playBackgroundMusic() {
-             if (!audioInitialized || !hasInteracted) return; if(sounds.background.paused){console.log("Playing BGM."); sounds.background.play().catch(e=>console.error("Play BGM Error:",e.message));}
+             if (!audioInitialized || !hasInteracted) return;
+             if (sounds.background.paused) { console.log("Playing BGM."); sounds.background.play().catch(e => console.error("Play BGM Error:", e.message)); }
         }
         function stopBackgroundMusic() {
-             if (!sounds.background.paused){console.log("Stopping BGM."); sounds.background.pause(); sounds.background.currentTime=0;}
+             if (!sounds.background.paused) { console.log("Stopping BGM."); sounds.background.pause(); sounds.background.currentTime = 0; }
         }
 
         // --- Backend API Call ---
         async function apiCall(endpoint, method = 'GET', body = null) {
-             console.log(`API: ${method} ${BACKEND_URL}${endpoint}`); if(body && method==='POST'){console.log("Body:",JSON.stringify(body).substring(0,100)+'...');} const opts={method:method,headers:{'Content-Type':'application/json'}}; if(body){opts.body=JSON.stringify(body);} try{const res=await fetch(`${BACKEND_URL}${endpoint}`,opts); if(!res.ok){let errData={message:`HTTP ${res.status} ${res.statusText}`}; console.error(`API Error Status: ${res.status} ${res.statusText} for ${endpoint}`); try{const jsonErr=await res.json(); errData=jsonErr; console.error("API Err Body(JSON):",errData);}catch(pE){try{const txtErr=await res.text(); console.error("API Err Body(Text):",txtErr.substring(0,150)); errData.message=txtErr.substring(0,150)+(txtErr.length>150?'...':'');}catch(tE){console.error("Can't read err body.");}} throw new Error(errData.message||`HTTP error ${res.status}`);} const data=await res.json(); console.log(`API OK from ${endpoint}:`,data); return data;}catch(error){console.error(`API Fail for ${method} ${endpoint}:`,error.message); throw error;}
+             console.log(`API: ${method} ${BACKEND_URL}${endpoint}`);
+             if (body && method==='POST') { console.log("Body:", JSON.stringify(body).substring(0,100)+'...'); }
+             const opts = { method: method, headers: { 'Content-Type': 'application/json' } };
+             if (body) { opts.body = JSON.stringify(body); }
+             try {
+                 const res = await fetch(`${BACKEND_URL}${endpoint}`, opts);
+                 if (!res.ok) {
+                     let errData = { message: `HTTP ${res.status} ${res.statusText}` };
+                     console.error(`API Error Status: ${res.status} ${res.statusText} for ${endpoint}`);
+                     try { const jsonErr = await res.json(); errData = jsonErr; console.error("API Err Body(JSON):", errData); }
+                     catch(pE1) { try { const txtErr = await res.text(); console.error("API Err Body(Text):", txtErr.substring(0, 150)); errData.message = txtErr.substring(0, 150) + (txtErr.length > 150 ? '...' : ''); } catch (pE2) { console.error("Can't read error body."); } }
+                     throw new Error(errData.message || `HTTP error ${res.status}`);
+                 }
+                 const data = await res.json(); console.log(`API OK from ${endpoint}:`, data); return data;
+             } catch (error) { console.error(`API Fail for ${method} ${endpoint}:`, error.message); throw error; }
         }
 
         // --- Authentication Logic ---
         function showLogin() { authForms.signup.style.display='none'; authForms.login.style.display='block'; updateAuthMessage('signup',''); updateAuthMessage('login',''); loginUsernameInput.focus(); }
         function showSignup() { authForms.login.style.display='none'; authForms.signup.style.display='block'; updateAuthMessage('login',''); updateAuthMessage('signup',''); signupUsernameInput.focus(); }
-        async function handleLogin(e) { if(e)e.preventDefault(); console.log("Login attempt..."); const u=loginUsernameInput.value.trim(); const p=loginPasswordInput.value.trim(); if(!u||!p){updateAuthMessage('login','Username/Password required.');return;} setLoading(true); updateAuthMessage('login',''); try{const data=await apiCall('/login','POST',{username:u,password:p}); if(data.success&&data.username){console.log("Login OK:",data.username); username=data.username; localStorage.setItem('fruitUsername',username); updateAuthMessage('login','Login Successful!',false); setLoading(false); playSound('start'); setTimeout(()=>startGameSession(),500);}else{throw new Error(data.message||'Login failed.');}}catch(error){console.error("Login Err:",error.message); updateAuthMessage('login',`Login Failed: ${error.message}`); setLoading(false); playSound('bomb');}}
-        async function handleSignup(e) { if(e)e.preventDefault(); console.log("Signup attempt..."); const u=signupUsernameInput.value.trim(); const p=signupPasswordInput.value.trim(); if(!u||!p){updateAuthMessage('signup','Username/Password required.');return;} if(p.length<4||u.length<3){updateAuthMessage('signup','User>=3 chars, Pass>=4 chars.');return;} setLoading(true); updateAuthMessage('signup',''); try{const data=await apiCall('/signup','POST',{username:u,password:p}); if(data.success){console.log("Signup OK:",u); updateAuthMessage('signup','Signup successful! Please login.',false); signupUsernameInput.value=''; signupPasswordInput.value=''; setLoading(false); playSound('start'); showLogin();}else{throw new Error(data.message||'Signup failed.');}}catch(error){console.error("Signup Err:",error.message); updateAuthMessage('signup',`Signup Failed: ${error.message}`); setLoading(false); playSound('bomb');}}
-        function checkAutoLogin() { console.log("Checking auto-login..."); const storedUser=localStorage.getItem('fruitUsername'); if(storedUser){username=storedUser; console.log(`Auto-login OK: "${username}".`); startGameSession();}else{console.log("No stored user. Show auth."); showView('auth'); showLogin();}}
-        function handleLogout() { console.log(`Logout: "${username}"`); playSound('start'); localStorage.removeItem('fruitUsername'); username=null; userHighScore=0; stopGameLoop(); stopBackgroundMusic(); gameObjects=[]; particles=[]; scorePopups=[]; isSwiping=false; swipePath=[]; gameOverScreen.style.display='none'; gameOverScreen.style.opacity='0'; newHighscoreEffect.style.display='none'; loginUsernameInput.value=''; loginPasswordInput.value=''; signupUsernameInput.value=''; signupPasswordInput.value=''; showView('auth'); showLogin();}
-        async function startGameSession() { console.log(`Start session: "${username}"...`); showView('game'); await fetchUserHighScore(); resetGame(); // resetGame now resets canvas background too
-         displayLives(); scoreDisplay.textContent=score; startScreen.style.display='block'; console.log("Session ready. Wait for start tap.");}
+
+        async function handleLogin(e) {
+             if(e) e.preventDefault(); console.log("Login attempt...");
+             const u = loginUsernameInput.value.trim(); const p = loginPasswordInput.value.trim();
+             if (!u || !p) { updateAuthMessage('login', 'Username/Password required.'); return; }
+             setLoading(true); updateAuthMessage('login', '');
+             try {
+                 const data = await apiCall('/login', 'POST', { username: u, password: p });
+                 if (data.success && data.username) {
+                     console.log("Login OK:", data.username); username = data.username; localStorage.setItem('fruitUsername', username); updateAuthMessage('login', 'Login Successful!', false); setLoading(false); playSound('start'); setTimeout(() => startGameSession(), 500);
+                 } else { throw new Error(data.message || 'Login failed.'); }
+             } catch (error) { console.error("Login Err:", error.message); updateAuthMessage('login', `Login Failed: ${error.message}`); setLoading(false); playSound('bomb'); }
+        }
+
+        async function handleSignup(e) {
+             if(e) e.preventDefault(); console.log("Signup attempt...");
+             const u = signupUsernameInput.value.trim(); const p = signupPasswordInput.value.trim();
+             if (!u || !p) { updateAuthMessage('signup', 'Username/Password required.'); return; }
+             if (p.length < 4 || u.length < 3) { updateAuthMessage('signup', 'User>=3 chars, Pass>=4 chars.'); return; }
+             setLoading(true); updateAuthMessage('signup', '');
+             try {
+                 const data = await apiCall('/signup', 'POST', { username: u, password: p });
+                 if (data.success) {
+                     console.log("Signup OK:", u); updateAuthMessage('signup', 'Signup successful! Please login.', false); signupUsernameInput.value = ''; signupPasswordInput.value = ''; setLoading(false); playSound('start'); showLogin();
+                 } else { throw new Error(data.message || 'Signup failed.'); }
+             } catch (error) { console.error("Signup Err:", error.message); updateAuthMessage('signup', `Signup Failed: ${error.message}`); setLoading(false); playSound('bomb'); }
+        }
+
+        function checkAutoLogin() {
+             console.log("Checking auto-login..."); const storedUser = localStorage.getItem('fruitUsername');
+             if (storedUser) { username = storedUser; console.log(`Auto-login OK: "${username}".`); startGameSession(); }
+             else { console.log("No stored user. Show auth."); showView('auth'); showLogin(); }
+        }
+
+        function handleLogout() {
+            console.log(`Logout: "${username}"`); playSound('start'); localStorage.removeItem('fruitUsername'); username = null; userHighScore = 0; stopGameLoop(); stopBackgroundMusic();
+            gameObjects=[]; particles=[]; scorePopups=[]; isSwiping=false; swipePath=[];
+            gameOverScreen.style.display = 'none'; gameOverScreen.style.opacity = '0'; newHighscoreEffect.style.display = 'none'; startScreen.style.display = 'none';
+            loginUsernameInput.value = ''; loginPasswordInput.value = ''; signupUsernameInput.value = ''; signupPasswordInput.value = '';
+            showView('auth'); showLogin();
+        }
+
+        async function startGameSession() {
+            console.log(`Start session: "${username}"...`);
+            await fetchUserHighScore(); showView('game');
+            console.log("Session ready. Wait for start tap.");
+        }
+
+        // --- UI State Management ---
+        function setIdleUIState() {
+            console.log("Setting UI to IDLE state");
+            highscoreDisplay.style.display = 'flex'; gameControlsGroup.style.display = 'flex'; scoreDisplay.style.display = 'none'; livesDisplay.style.display = 'none';
+            highscoreDisplaySpan.textContent = userHighScore; displayLives(); scoreDisplaySpan.textContent = 0;
+        }
+        function setPlayingUIState() {
+            console.log("Setting UI to PLAYING state");
+            highscoreDisplay.style.display = 'none'; gameControlsGroup.style.display = 'none'; scoreDisplay.style.display = 'flex'; livesDisplay.style.display = 'flex';
+            scoreDisplaySpan.textContent = score; displayLives();
+        }
+        function setGameOverUIState() {
+             console.log("Setting UI to GAME OVER state (showing overlay)");
+             highscoreDisplay.style.display = 'none'; gameControlsGroup.style.display = 'none'; scoreDisplay.style.display = 'none'; livesDisplay.style.display = 'none';
+             gameOverScreen.style.display = 'flex';
+        }
 
         // --- Game Logic ---
-        function resizeCanvas() { canvas.width=window.innerWidth; canvas.height=window.innerHeight; console.log(`Resized: ${canvas.width}x${canvas.height}`);}
-        function getCurrentSpawnRate() { const rate=INITIAL_SPAWN_RATE-Math.floor(score/100)*SPAWN_RATE_DECREASE_PER_100_SCORE; return Math.max(MIN_SPAWN_RATE,rate);}
+        function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; console.log(`Resized: ${canvas.width}x${canvas.height}`); }
+        function getCurrentSpawnRate() { const rate = INITIAL_SPAWN_RATE - Math.floor(score / 100) * SPAWN_RATE_DECREASE_PER_100_SCORE; return Math.max(MIN_SPAWN_RATE, rate); }
 
-        function spawnObject() { // Spawns only from bottom
+        // *** MODIFIED spawnObject function ***
+        function spawnObject() {
             if (gameState !== 'playing') return;
+
             const isCombo = Math.random() < COMBO_CHANCE;
-            const count = isCombo ? getRandomInt(MIN_COMBO_SIZE, MAX_COMBO_SIZE) : 1;
-            const baseStartX = getRandom(canvas.width * 0.15, canvas.width * 0.85); // X position at bottom
-            // Use ADJUSTABLE constants for initial velocity (slightly reduced)
-            const initialVY = -getRandom(canvas.height * INITIAL_VY_MIN_FACTOR, canvas.height * INITIAL_VY_MAX_FACTOR);
-            // Use ADJUSTABLE gravity factor (slightly reduced)
-            const currentGravity = GRAVITY_FACTOR * (canvas.height / 800);
+            const count = isCombo ? getRandomInt(MIN_COMBO_SPAWN_COUNT, MAX_COMBO_SPAWN_COUNT) : 1;
+            const baseStartX = getRandom(canvas.width * 0.15, canvas.width * 0.85);
+
+            // Determine shared vertical physics *before* the loop IF it's a combo spawn
+            let sharedInitialVY = 0;
+            let sharedGravity = 0;
+            if (isCombo) {
+                sharedInitialVY = -getRandom(canvas.height * INITIAL_VY_MIN_FACTOR, canvas.height * INITIAL_VY_MAX_FACTOR);
+                sharedGravity = GRAVITY_FACTOR * (canvas.height / 800);
+                console.log(`Spawning COMBO (${count} fruits)`);
+            }
 
             for (let i = 0; i < count; i++) {
+                // Bombs only appear on single spawns, not in combos
                 const isBomb = !isCombo && Math.random() < BOMB_CHANCE;
                 const emoji = isBomb ? BOMB_EMOJI : FRUITS[getRandomInt(0, FRUITS.length - 1)];
 
-                // Combo Spacing Adjustment: wider X offset and slight variance in VX targetting
-                const xOffset = isCombo ? getRandom(-canvas.width*0.08, canvas.width*0.08) : 0; // Wider offset
-                const x = baseStartX + xOffset;
-                const y = canvas.height + 70 + getRandom(-15, 15); // Consistently below screen, slightly more variance
+                // Determine vertical physics: use shared values for combo, calculate individually for single
+                const initialVY = isCombo ? sharedInitialVY : -getRandom(canvas.height * INITIAL_VY_MIN_FACTOR, canvas.height * INITIAL_VY_MAX_FACTOR);
+                const currentGravity = isCombo ? sharedGravity : GRAVITY_FACTOR * (canvas.height / 800);
 
-                // Target X Calculation (slightly varied for combos)
-                const targetXVariance = isCombo ? getRandom(-canvas.width*0.05, canvas.width*0.05) : 0;
+                // Horizontal positioning and velocity (calculated individually for spread)
+                const xOffset = isCombo ? getRandom(-canvas.width * 0.06, canvas.width * 0.06) : 0; // Slightly tighter horizontal for combos
+                const x = baseStartX + xOffset;
+                const y = canvas.height + 70 + getRandom(-15, 15); // Start below screen
+
+                const targetXVariance = isCombo ? getRandom(-canvas.width*0.04, canvas.width*0.04) : 0; // Less variance for combos
                 const targetX = getRandom(canvas.width * 0.15, canvas.width * 0.85) + targetXVariance;
 
-                // VX calculation based on actual starting X and target X
                 const timeToApexApprox = Math.abs(initialVY) / currentGravity;
-                // Aim to cross apex roughly over the target area
-                const requiredVx = (targetX - x) / (timeToApexApprox * 1.8); // Use actual x
-                // Apply slight random variance to Vx to further separate combo items
-                const vxVarianceMultiplier = isCombo ? getRandom(0.9, 1.1) : getRandom(0.85, 1.15);
+                const requiredVx = (targetX - x) / (timeToApexApprox * 1.8); // Adjust 1.8 factor if needed
+                // Apply less horizontal velocity variance for combos to keep them tighter? Or more? Let's keep similar variance.
+                const vxVarianceMultiplier = getRandom(0.9, 1.1); // Same range for now
                 const vx = requiredVx * vxVarianceMultiplier;
 
+                // Other properties
                 const rotationSpeed = getRandom(-0.05, 0.05);
-                // Increased fruit size (MODIFIED)
-                const fruitSize = Math.max(60, canvas.width * 0.09);
+                const fruitSize = Math.max(60, canvas.width * 0.09); // Responsive size
 
                  gameObjects.push({
-                    x, y, vx, vy: initialVY,
+                    x, y, vx, vy: initialVY, // Use determined initialVY
                     emoji, isBomb, isSliced: false,
                     size: fruitSize, rotation: getRandom(0, Math.PI * 2), rotationSpeed,
-                    gravity: currentGravity // Assign calculated gravity
+                    gravity: currentGravity // Use determined gravity
                  });
             }
         }
 
         function updateGameObjects(deltaTime) {
              if (gameState !== 'playing') return;
-             gameObjects=gameObjects.filter(obj=>{ if(obj.isSliced)return false; obj.vy+=obj.gravity*deltaTime; obj.x+=obj.vx*deltaTime; obj.y+=obj.vy*deltaTime; obj.rotation+=obj.rotationSpeed*deltaTime; if(obj.y>canvas.height+obj.size*2){ if(!obj.isBomb&&!obj.isSliced){console.log(`Missed: ${obj.emoji}`); loseLife();} return false;} return true;});
-             particles=particles.filter(p=>{ p.vy+=p.gravity*deltaTime; p.x+=p.vx*deltaTime; p.y+=p.vy*deltaTime; p.life-=deltaTime; p.alpha=Math.max(0,p.life/PARTICLE_LIFE); return p.life>0;});
+             gameObjects = gameObjects.filter(obj => {
+                 if (obj.isSliced) return false;
+                 obj.vy += obj.gravity * deltaTime; obj.x += obj.vx * deltaTime; obj.y += obj.vy * deltaTime; obj.rotation += obj.rotationSpeed * deltaTime;
+                 if (obj.y > canvas.height + obj.size * 2) { if (!obj.isBomb) { console.log(`Missed: ${obj.emoji}`); loseLife(); } return false; }
+                 return true;
+             });
+             particles = particles.filter(p => {
+                 p.vy += p.gravity * deltaTime; p.x += p.vx * deltaTime; p.y += p.vy * deltaTime; p.life -= deltaTime; p.alpha = Math.max(0, p.life / PARTICLE_LIFE); return p.life > 0;
+             });
         }
-        function drawGameObjects() { gameObjects.forEach(obj=>{if(obj.isSliced)return; ctx.save(); ctx.translate(obj.x,obj.y); ctx.rotate(obj.rotation); ctx.font=`${obj.size}px Arial`; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.shadowColor='rgba(0,0,0,0.3)'; ctx.shadowBlur=5; ctx.shadowOffsetX=obj.size*0.05; ctx.shadowOffsetY=obj.size*0.08; ctx.fillText(obj.emoji,0,0); ctx.restore();});}
-        function drawParticles() { particles.forEach(p=>{ ctx.save(); ctx.globalAlpha=p.alpha; ctx.fillStyle=p.color; ctx.beginPath(); ctx.arc(p.x,p.y,p.size,0,Math.PI*2); ctx.fill(); ctx.restore();});}
-        function createScorePopup(text, x, y) { const p=document.createElement('div'); p.className='score-popup'; p.textContent=text; p.style.left=`${x}px`; p.style.top=`${y}px`; p.style.transform='translate(-50%,-50%) scale(0.8)'; p.style.opacity='1'; scorePopupContainer.appendChild(p); requestAnimationFrame(()=>{p.style.transform='translate(-50%,-150%) scale(1.1)'; p.style.opacity='0';}); setTimeout(()=>{if(p.parentNode===scorePopupContainer){scorePopupContainer.removeChild(p);}},600);}
-        function drawSwipeTrail() { if(swipePath.length<2)return; ctx.save(); ctx.strokeStyle=SWIPE_COLOR; ctx.lineWidth=SWIPE_THICKNESS; ctx.lineCap='round'; ctx.lineJoin='round'; ctx.globalAlpha=0.8; ctx.shadowColor='rgba(255,255,255,0.5)'; ctx.shadowBlur=8; ctx.beginPath(); ctx.moveTo(swipePath[0].x,swipePath[0].y); for(let i=1;i<swipePath.length;i++){ctx.lineTo(swipePath[i].x,swipePath[i].y);} ctx.stroke(); ctx.restore();}
+        function drawGameObjects() {
+            gameObjects.forEach(obj => {
+                if (obj.isSliced) return;
+                ctx.save(); ctx.translate(obj.x, obj.y); ctx.rotate(obj.rotation); ctx.font = `${obj.size}px Arial`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                ctx.shadowColor = 'rgba(0,0,0,0.3)'; ctx.shadowBlur = 5; ctx.shadowOffsetX = obj.size * 0.05; ctx.shadowOffsetY = obj.size * 0.08;
+                ctx.fillText(obj.emoji, 0, 0); ctx.restore();
+            });
+        }
+        function drawParticles() { particles.forEach(p => { ctx.save(); ctx.globalAlpha = p.alpha; ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill(); ctx.restore(); }); }
+        function createScorePopup(text, x, y) {
+            const p = document.createElement('div'); p.className = 'score-popup'; p.textContent = text; p.style.left = `${x}px`; p.style.top = `${y}px`;
+            p.style.transform = 'translate(-50%, -50%) scale(0.8)'; p.style.opacity = '1'; scorePopupContainer.appendChild(p);
+            requestAnimationFrame(() => { p.style.transform = 'translate(-50%, -150%) scale(1.1)'; p.style.opacity = '0'; });
+            setTimeout(() => { if (p.parentNode === scorePopupContainer) { scorePopupContainer.removeChild(p); } }, 600);
+        }
+        function drawSwipeTrail() {
+            if (swipePath.length < 2) return;
+            ctx.save(); ctx.strokeStyle = SWIPE_COLOR; ctx.lineWidth = SWIPE_THICKNESS; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.globalAlpha = 0.8;
+            ctx.shadowColor = 'rgba(255,255,255,0.5)'; ctx.shadowBlur = 8; ctx.beginPath(); ctx.moveTo(swipePath[0].x, swipePath[0].y);
+            for (let i = 1; i < swipePath.length; i++) { ctx.lineTo(swipePath[i].x, swipePath[i].y); } ctx.stroke(); ctx.restore();
+        }
         function checkCollisions() {
              if (swipePath.length < 2 || gameState !== 'playing') return;
              const pointsToCheck = Math.min(swipePath.length - 1, 3);
-             let slicedInThisCheck = 0; // Track combo slices within this check
+             // REMOVED: let slicedInThisCheck = 0; // No longer needed for combo logic
+
              for (let i = 1; i <= pointsToCheck; i++) {
                   const currentPoint = swipePath[swipePath.length - i]; const prevPoint = swipePath[swipePath.length - i - 1];
-                  for (let j = gameObjects.length - 1; j >= 0; j--) { // Iterate backwards for safe removal/marking
+                  for (let j = gameObjects.length - 1; j >= 0; j--) {
                       const obj = gameObjects[j];
                       if (!obj.isSliced) {
                           const dist = pointToSegmentDistance(obj.x, obj.y, prevPoint.x, prevPoint.y, currentPoint.x, currentPoint.y);
-                          const collisionRadius = obj.size * 0.45; // Use 45% of size for collision
+                          const collisionRadius = obj.size * 0.45;
                           if (dist < collisionRadius) {
                               handleSlice(obj);
-                              slicedInThisCheck++;
+                              // REMOVED: slicedInThisCheck++;
                           }
                       }
                   }
              }
-              // Reset combo *only* if swipe continues but no new fruit is hit for a short duration
-             if (slicedInThisCheck === 0 && swipePath.length > 5 && Date.now() - lastSwipeTime > 150) {
-                 currentCombo = 0;
-             }
+             // REMOVED: Combo reset logic based on slicedInThisCheck
         }
-        function pointToSegmentDistance(px,py,x1,y1,x2,y2){ const l2=(x2-x1)**2+(y2-y1)**2; if(l2===0)return Math.hypot(px-x1,py-y1); let t=((px-x1)*(x2-x1)+(py-y1)*(y2-y1))/l2; t=Math.max(0,Math.min(1,t)); const cX=x1+t*(x2-x1); const cY=y1+t*(y2-y1); return Math.hypot(px-cX,py-cY);}
-        function handleSlice(obj) { if(obj.isSliced||gameState!=='playing')return; obj.isSliced=true; if(obj.isBomb){console.log("Bomb sliced!"); playSound('bomb'); currentCombo=0; gameOver();}else{playSound('cut'); currentCombo++; const scoreEarned=FRUIT_BASE_SCORE+Math.max(0,currentCombo-1)*COMBO_BONUS_MULTIPLIER; score+=scoreEarned; scoreDisplay.textContent=score; const popupText=currentCombo>1?`+${scoreEarned} (${currentCombo}x Combo!)`:`+${scoreEarned}`; createScorePopup(popupText,obj.x,obj.y); const fruitColor=getFruitColor(obj.emoji); const particleGravity = GRAVITY_FACTOR * 1.5 * (canvas.height / 800); for(let i=0;i<PARTICLE_COUNT;i++){const angle=Math.random()*Math.PI*2; const speed=getRandom(2,5); particles.push({x:obj.x, y:obj.y, vx:Math.cos(angle)*speed, vy:Math.sin(angle)*speed-2, size:getRandom(3,6), color:fruitColor, life:PARTICLE_LIFE, gravity: particleGravity, alpha:1});} console.log(`Sliced: ${obj.emoji}, Combo:${currentCombo}, +${scoreEarned}`);}}
-        function getFruitColor(emoji) { switch(emoji){case'🍎':case'🍓':case'🍒':return'#FF4136';case'🍌':case'🍍':return'#FFDC00';case'🍉':case'🥝':return'#2ECC40';case'🍊':case'🥭':case'🍑':return'#FF851B';case'🍇':return'#B10DC9';case'🥥':return'#AAAAAA';default:return'#FFFFFF';}}
-        function loseLife() { if(gameState!=='playing'||lives<=0)return; lives--; currentCombo=0; console.log(`Life lost. Left: ${lives}`); displayLives(); document.body.style.transition='background-color 0.1s ease-out'; document.body.style.backgroundColor='rgba(255,0,0,0.4)'; setTimeout(()=>{document.body.style.backgroundColor=''; setTimeout(()=>{document.body.style.transition='';},100);},100); if(lives<=0){console.log("Game Over (Lives)."); gameOver();}else{playSound('bomb');}}
-        function displayLives() { livesDisplay.innerHTML='❤️'.repeat(Math.max(0,lives))+'<span style="opacity:0.5;">❤️</span>'.repeat(3-Math.max(0,lives));} // Use faded hearts instead of broken
+        function pointToSegmentDistance(px, py, x1, y1, x2, y2) { const l2 = (x2 - x1)**2 + (y2 - y1)**2; if (l2 === 0) return Math.hypot(px - x1, py - y1); let t = ((px - x1) * (x2 - x1) + (py - y1) * (y2 - y1)) / l2; t = Math.max(0, Math.min(1, t)); const cX = x1 + t * (x2 - x1); const cY = y1 + t * (y2 - y1); return Math.hypot(px - cX, py - cY); }
 
+        // *** MODIFIED handleSlice function ***
+        function handleSlice(obj) {
+            if (obj.isSliced || gameState !== 'playing') return;
+            obj.isSliced = true;
+
+            if (obj.isBomb) {
+                console.log("Bomb sliced!"); playSound('bomb'); gameOver();
+            } else {
+                playSound('cut');
+                const scoreEarned = FRUIT_BASE_SCORE; // Score is always the base score now
+                score += scoreEarned;
+                scoreDisplaySpan.textContent = score;
+
+                const popupText = `+${scoreEarned}`; // Simplified popup text
+                createScorePopup(popupText, obj.x, obj.y);
+
+                const fruitColor = getFruitColor(obj.emoji);
+                const particleGravity = GRAVITY_FACTOR * 1.5 * (canvas.height / 800);
+                for (let i = 0; i < PARTICLE_COUNT; i++) {
+                    const angle = Math.random() * Math.PI * 2; const speed = getRandom(2, 5);
+                    particles.push({ x: obj.x, y: obj.y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed - 2, size: getRandom(3, 6), color: fruitColor, life: PARTICLE_LIFE, gravity: particleGravity, alpha: 1 });
+                }
+                console.log(`Sliced: ${obj.emoji}, +${scoreEarned}, Score: ${score}`); // Removed combo from log
+            }
+        }
+        function getFruitColor(emoji) { switch(emoji){ case '🍎': case '🍓': case '🍒': return '#FF4136'; case '🍌': case '🍍': return '#FFDC00'; case '🍉': case '🥝': return '#2ECC40'; case '🍊': case '🥭': case '🍑': return '#FF851B'; case '🍇': return '#B10DC9'; case '🥥': return '#DDDDDD'; default: return '#FFFFFF'; } }
+
+        function loseLife() {
+            if (gameState !== 'playing' || lives <= 0) return;
+            lives--;
+            // REMOVED: currentCombo = 0;
+            console.log(`Life lost. Left: ${lives}`); displayLives();
+            document.body.style.transition = 'background-color 0.1s ease-out'; document.body.style.backgroundColor = 'rgba(255,0,0,0.4)';
+            setTimeout(() => { document.body.style.backgroundColor = ''; setTimeout(() => { document.body.style.transition = ''; }, 100); }, 100);
+            if (lives <= 0) { console.log("Game Over (Lives ran out)."); gameOver(); }
+            else { playSound('bomb'); }
+        }
+        function displayLives() { livesDisplaySpan.innerHTML = '❤️'.repeat(Math.max(0, lives)) + '<span style="opacity:0.3;">❤️</span>'.repeat(3 - Math.max(0, lives)); }
 
         function gameOver() {
             if (gameState === 'gameover') return;
-            console.log(`--- GAME OVER --- Score: ${score}, High Score: ${userHighScore}`); gameState = 'gameover';
-            stopGameLoop(); // stops BGM, intervals, animation frame & resets canvas background
-            currentCombo = 0;
-            // Clear objects immediately now
-            gameObjects = [];
-            particles = [];
-            playSound('gameOver');
-            finalScoreDisplay.textContent = score; // Show score from this round
-            finalHighscoreDisplay.textContent = userHighScore; // Show best overall
-            newHighscoreEffect.style.display = 'none'; // Hide initially
+            console.log(`--- GAME OVER --- Score: ${score}, High Score Before: ${userHighScore}`);
+            gameState = 'gameover'; stopGameLoop(); gameObjects = []; particles = []; ctx.clearRect(0, 0, canvas.width, canvas.height); playSound('gameOver');
+            finalScoreDisplay.textContent = score; finalHighscoreDisplay.textContent = userHighScore; newHighscoreEffect.style.display = 'none';
              if (score > userHighScore) {
-                 console.log("NEW HIGH SCORE!");
-                 newHighscoreEffect.style.display = 'block'; // Show effect
-                 userHighScore = score; finalHighscoreDisplay.textContent = userHighScore; // Update display
-                 submitScore(score);
-             } else { console.log("Score not high score."); }
-             // Delay showing game over screen slightly more for effect
-             setTimeout(() => { gameOverScreen.style.display = 'flex'; gameOverScreen.style.opacity = '1'; }, 700);
+                 console.log("NEW HIGH SCORE!"); newHighscoreEffect.style.display = 'block'; userHighScore = score; finalHighscoreDisplay.textContent = userHighScore; highscoreDisplaySpan.textContent = userHighScore; submitScore(score);
+             } else { console.log("Score did not beat high score."); }
+             setGameOverUIState();
         }
 
         function resetGame() {
-            console.log("Resetting game state..."); score=0; lives=3; gameObjects=[]; particles=[]; scorePopups=[]; swipePath=[]; isSwiping=false; currentCombo=0;
-            scoreDisplay.textContent=score; displayLives(); gameOverScreen.style.display='none'; gameOverScreen.style.opacity='0'; newHighscoreEffect.style.display='none'; // Hide effect
-            scorePopupContainer.innerHTML=''; gameState='idle';
-            // Reset canvas background to default
-            canvas.style.background = DEFAULT_CANVAS_BACKGROUND;
+            console.log("Resetting game state to idle...");
+            score = 0; lives = 3; gameObjects = []; particles = []; scorePopups = []; swipePath = []; isSwiping = false;
+            // REMOVED: currentCombo = 0;
+            gameOverScreen.style.display = 'none'; gameOverScreen.style.opacity = '0'; newHighscoreEffect.style.display = 'none'; infoModal.classList.remove('active');
+            scorePopupContainer.innerHTML = ''; canvas.style.background = DEFAULT_CANVAS_BACKGROUND; setIdleUIState(); gameState = 'idle';
             console.log("Game state reset to idle.");
         }
 
         function startGameLoop() {
-             if (animationFrameId !== null || gameState === 'gameover') return; console.log("Starting game loop...");
-             resetGame(); gameState='playing'; startScreen.style.display='none';
-             // Set active game background
-             canvas.style.background = ACTIVE_GAME_BACKGROUND;
-
-             if(!hasInteracted){console.warn("No interaction, audio may fail.");}else if(!audioInitialized){initAudio();} playSound('start'); playBackgroundMusic();
-             cancelAnimationFrame(animationFrameId); clearTimeout(spawnTimeoutId);
-             function scheduleNextSpawn(){if(gameState!=='playing')return; const currentRate=getCurrentSpawnRate(); spawnTimeoutId=setTimeout(()=>{spawnObject(); scheduleNextSpawn();},currentRate);} scheduleNextSpawn();
-             let lastTime=performance.now();
-             function loop(currentTime){ if(gameState!=='playing'){cancelAnimationFrame(animationFrameId); animationFrameId=null; clearTimeout(spawnTimeoutId); spawnTimeoutId=null; return;} const deltaTime=Math.min((currentTime-lastTime)/16.67,4); lastTime=currentTime; ctx.clearRect(0,0,canvas.width,canvas.height); updateGameObjects(deltaTime); drawGameObjects(); drawParticles(); drawSwipeTrail(); animationFrameId=requestAnimationFrame(loop);} animationFrameId=requestAnimationFrame(loop);
+             if (gameState !== 'idle') { console.warn(`Attempted to start game loop from state: ${gameState}. Aborting.`); return; }
+             console.log("Starting game loop...");
+             score = 0; lives = 3; gameObjects = []; particles = [];
+             // REMOVED: currentCombo = 0;
+             gameState = 'playing'; startScreen.style.display = 'none'; setPlayingUIState(); canvas.style.background = ACTIVE_GAME_BACKGROUND;
+             if (!hasInteracted) { console.warn("No interaction yet, audio may fail."); } else if (!audioInitialized) { initAudio(); } playSound('start'); playBackgroundMusic();
+             cancelAnimationFrame(animationFrameId); animationFrameId = null; clearTimeout(spawnTimeoutId); spawnTimeoutId = null;
+             function scheduleNextSpawn() { if (gameState !== 'playing') return; const currentRate = getCurrentSpawnRate(); spawnTimeoutId = setTimeout(() => { spawnObject(); scheduleNextSpawn(); }, currentRate); } scheduleNextSpawn();
+             let lastTime = performance.now();
+             function loop(currentTime) {
+                 if (gameState !== 'playing') { console.log("Game loop stopping because state is not 'playing'."); cancelAnimationFrame(animationFrameId); animationFrameId = null; clearTimeout(spawnTimeoutId); spawnTimeoutId = null; return; }
+                 const deltaTime = Math.min((currentTime - lastTime) / 16.67, 4); lastTime = currentTime;
+                 ctx.clearRect(0, 0, canvas.width, canvas.height); updateGameObjects(deltaTime); drawGameObjects(); drawParticles(); drawSwipeTrail(); animationFrameId = requestAnimationFrame(loop);
+             }
+             animationFrameId = requestAnimationFrame(loop);
         }
+
         function stopGameLoop() {
-             if(animationFrameId!==null){console.log("Stopping game loop."); cancelAnimationFrame(animationFrameId); animationFrameId=null;}
-             if(spawnTimeoutId!==null){clearTimeout(spawnTimeoutId); spawnTimeoutId=null;}
-             // Reset canvas background when stopping loop (e.g., going to leaderboard, game over)
-             canvas.style.background = DEFAULT_CANVAS_BACKGROUND;
-             stopBackgroundMusic();
+             let stoppedFrame = false; let stoppedSpawner = false;
+             if (animationFrameId !== null) { console.log("Stopping game loop animation frame."); cancelAnimationFrame(animationFrameId); animationFrameId = null; stoppedFrame = true; }
+             if (spawnTimeoutId !== null) { console.log("Stopping object spawner."); clearTimeout(spawnTimeoutId); spawnTimeoutId = null; stoppedSpawner = true; }
+             if (gameState !== 'playing') { canvas.style.background = DEFAULT_CANVAS_BACKGROUND; } stopBackgroundMusic();
         }
 
         // --- Input Handling ---
-        function handlePointerDown(x,y){if(gameState!=='playing')return; isSwiping=true; swipePath=[{x,y}]; lastSwipeTime=Date.now(); /* Don't reset combo here, only on miss/bomb/timeout */ }
-        function handlePointerMove(x,y){if(!isSwiping||gameState!=='playing')return; const now=Date.now(); const lastP=swipePath[swipePath.length-1]; const distSq=(x-lastP.x)**2+(y-lastP.y)**2; if(now-lastSwipeTime>10&&distSq>100){swipePath.push({x,y}); lastSwipeTime=now; if(swipePath.length>MAX_SWIPE_POINTS){swipePath.shift();} checkCollisions();}}
-        function handlePointerUp(){if(!isSwiping)return; isSwiping=false; setTimeout(()=>{if(!isSwiping){swipePath=[]; currentCombo=0; /* Reset combo shortly after swipe ends */ }},150);}
+        function handlePointerDown(x, y) { if (gameState !== 'playing') return; isSwiping = true; swipePath = [{ x, y }]; lastSwipeTime = Date.now(); }
+        function handlePointerMove(x, y) {
+            if (!isSwiping || gameState !== 'playing') return; const now = Date.now(); const lastP = swipePath[swipePath.length - 1]; const distSq = (x - lastP.x)**2 + (y - lastP.y)**2;
+            if (now - lastSwipeTime > 10 && distSq > 100) { swipePath.push({ x, y }); lastSwipeTime = now; if (swipePath.length > MAX_SWIPE_POINTS) { swipePath.shift(); } checkCollisions(); }
+        }
+        function handlePointerUp() {
+            if (!isSwiping) return; isSwiping = false;
+            setTimeout(() => { if (!isSwiping) { swipePath = []; /* Combo no longer resets here */ } }, 150);
+        }
 
         // --- Event Listeners ---
-        startScreen.addEventListener('click', () => { console.log("Start Screen clicked."); if(!hasInteracted)firstInteractionHandler(); startGameLoop(); });
-        canvas.addEventListener('mousedown', (e) => handlePointerDown(e.clientX, e.clientY));
-        canvas.addEventListener('mousemove', (e) => handlePointerMove(e.clientX, e.clientY));
+        startScreen.addEventListener('click', () => { console.log("Start Screen clicked."); if (gameState === 'idle') { if (!hasInteracted) firstInteractionHandler(); startGameLoop(); } else { console.warn("Start screen clicked but game state is not idle:", gameState); } });
+        canvas.addEventListener('mousedown', (e) => { e.preventDefault(); handlePointerDown(e.clientX, e.clientY); });
+        canvas.addEventListener('mousemove', (e) => { handlePointerMove(e.clientX, e.clientY); });
         window.addEventListener('mouseup', handlePointerUp); window.addEventListener('mouseleave', handlePointerUp);
-        canvas.addEventListener('touchstart', (e) => { e.preventDefault(); if(e.touches.length>0)handlePointerDown(e.touches[0].clientX, e.touches[0].clientY); }, { passive: false });
-        canvas.addEventListener('touchmove', (e) => { e.preventDefault(); if(e.touches.length>0)handlePointerMove(e.touches[0].clientX, e.touches[0].clientY); }, { passive: false });
+        canvas.addEventListener('touchstart', (e) => { e.preventDefault(); if (e.touches.length > 0) handlePointerDown(e.touches[0].clientX, e.touches[0].clientY); }, { passive: false });
+        canvas.addEventListener('touchmove', (e) => { e.preventDefault(); if (e.touches.length > 0) handlePointerMove(e.touches[0].clientX, e.touches[0].clientY); }, { passive: false });
         canvas.addEventListener('touchend', (e) => { e.preventDefault(); handlePointerUp(); });
         canvas.addEventListener('touchcancel', (e) => { e.preventDefault(); handlePointerUp(); });
         window.addEventListener('resize', resizeCanvas);
-        playAgainBtn.addEventListener('click', () => {
-            console.log("Play Again clicked.");
-            playSound('start');
-            gameOverScreen.style.display = 'none';
-            gameOverScreen.style.opacity = '0';
-            // Explicitly clear canvas BEFORE showing start screen to avoid ghost fruits
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            resetGame(); // Resets game state and canvas background
-            startScreen.style.display = 'block'; // Show start screen again
-        });
+        playAgainBtn.addEventListener('click', () => { console.log("Play Again clicked."); playSound('start'); gameOverScreen.style.display = 'none'; gameOverScreen.style.opacity = '0'; ctx.clearRect(0, 0, canvas.width, canvas.height); resetGame(); startScreen.style.display = 'block'; });
         loginBtn.addEventListener('click', handleLogin); signupBtn.addEventListener('click', handleSignup); logoutBtn.addEventListener('click', handleLogout);
-        leaderboardBtn.addEventListener('click', () => { console.log("Leaderboard clicked."); playSound('start'); stopGameLoop(); startScreen.style.display='none'; fetchLeaderboard(true); showView('leaderboard');});
-        backToGameBtn.addEventListener('click', () => { console.log("Back to Game clicked."); playSound('start'); showView('game'); resetGame(); startScreen.style.display='block';});
+        leaderboardBtn.addEventListener('click', () => { console.log("Leaderboard button clicked."); playSound('start'); stopGameLoop(); startScreen.style.display = 'none'; fetchLeaderboard(true); showView('leaderboard'); });
+        backToGameBtn.addEventListener('click', () => { console.log("Back to Game button clicked."); playSound('start'); showView('game'); });
         infoToggleBtn.addEventListener('click', () => { console.log("Info toggle clicked."); playSound('start'); infoModal.classList.add('active'); });
         closeInfoBtn.addEventListener('click', () => { console.log("Close info clicked."); playSound('start'); infoModal.classList.remove('active'); });
-        infoModal.addEventListener('click', (e) => { if(e.target===infoModal){console.log("Info backdrop clicked."); playSound('start'); infoModal.classList.remove('active');}});
+        infoModal.addEventListener('click', (e) => { if (e.target === infoModal) { console.log("Info backdrop clicked."); playSound('start'); infoModal.classList.remove('active'); } });
 
         // --- Leaderboard Functions ---
         function displayLeaderboard(scores) {
-            console.log("Displaying leaderboard:", scores);
-            leaderboardData = scores.sort((a, b) => b.score - a.score).slice(0, 50); leaderboardList.innerHTML = '';
-            if (leaderboardData.length === 0) { leaderboardList.innerHTML = '<li class="loading" style="font-style: normal;">No scores yet!</li>'; return; }
+            console.log("Displaying leaderboard:", scores); leaderboardData = scores.sort((a, b) => b.score - a.score).slice(0, 50); leaderboardList.innerHTML = '';
+            if (leaderboardData.length === 0) { leaderboardList.innerHTML = '<li class="loading" style="font-style: normal;">No scores yet! Be the first!</li>'; return; }
             const fragment = document.createDocumentFragment();
             leaderboardData.forEach((entry, index) => {
-                 if (!entry?.username || typeof entry.score !== 'number') { console.warn("Skipping invalid lb entry:", entry); return; }
-                 const li = document.createElement('li'); if (entry.username === username) li.classList.add('highlight-user');
-                 let rankDisplay = `#${index + 1}`;
-                 let medal = '';
-                 if (index === 0) medal = '🥇';
-                 else if (index === 1) medal = '🥈';
-                 else if (index === 2) medal = '🥉';
-
-                 li.innerHTML = `
-                    <span class="rank">${rankDisplay} ${medal ? `<span class="medal">${medal}</span>` : ''}</span>
-                    <span class="username" title="${entry.username}">${entry.username}</span>
-                    <span class="score">${entry.score}</span>`;
+                 if (!entry || typeof entry.username !== 'string' || typeof entry.score !== 'number') { console.warn("Skipping invalid leaderboard entry:", entry); return; }
+                 const li = document.createElement('li'); if (entry.username === username) { li.classList.add('highlight-user'); }
+                 let rankDisplay = `#${index + 1}`; let medal = ''; if (index === 0) medal = '🥇'; else if (index === 1) medal = '🥈'; else if (index === 2) medal = '🥉';
+                 li.innerHTML = `<span class="rank">${rankDisplay} ${medal ? `<span class="medal">${medal}</span>` : ''}</span><span class="username" title="${entry.username}">${entry.username}</span><span class="score">${entry.score}</span>`;
                  fragment.appendChild(li);
             });
             leaderboardList.appendChild(fragment);
         }
-        async function fetchLeaderboard(force = false) { if(gameState!=='leaderboard'&&!force)return; console.log("Fetching leaderboard..."); if(gameState==='leaderboard'){leaderboardList.innerHTML='<li class="loading">Loading scores</li>';} try{const data=await apiCall('/leaderboard','GET'); if(data.success&&Array.isArray(data.scores)){displayLeaderboard(data.scores);}else{console.error("Failed fetch leaderboard:",data?.message); if(gameState==='leaderboard'){leaderboardList.innerHTML='<li class="loading" style="color:red;">Error loading.</li>';}}}catch(error){console.error("Error fetch leaderboard:",error.message); if(gameState==='leaderboard'){leaderboardList.innerHTML='<li class="loading" style="color:red;">Error loading.</li>';}}}
-        async function fetchUserHighScore() { if(!username){userHighScore=0;return;} console.log(`Fetching HS for "${username}"...`); try{const data=await apiCall('/leaderboard','GET'); if(data.success&&Array.isArray(data.scores)){const userEntry=data.scores.find(e=>e.username===username); userHighScore=userEntry?userEntry.score:0; console.log(`User HS: ${userHighScore}`);}else{console.warn("Could not fetch HS.",data?.message); userHighScore=0;}}catch(error){console.error("Error fetching HS:",error.message); userHighScore=0;}}
-        async function submitScore(newScore) { if(!username)return; console.log(`Submitting score: ${newScore} for ${username}`); try{const data=await apiCall('/score','POST',{username:username,score:newScore}); if(data.success){console.log("Score submit OK:",data.message); if(gameState==='leaderboard'){setTimeout(()=>fetchLeaderboard(true),500);}}else{console.error("Failed submit score(API):",data.message);}}catch(error){console.error("Error submit score:",error.message);}}
+        async function fetchLeaderboard(force = false) {
+            if (gameState !== 'leaderboard' && !force) return; console.log("Fetching leaderboard..."); if (gameState === 'leaderboard') { leaderboardList.innerHTML = '<li class="loading">Loading scores</li>'; }
+            try {
+                 const data = await apiCall('/leaderboard', 'GET');
+                 if (data.success && Array.isArray(data.scores)) { if (gameState === 'leaderboard' || force) { displayLeaderboard(data.scores); } }
+                 else { console.error("Failed fetch leaderboard:", data?.message || "Unknown error"); if (gameState === 'leaderboard') { leaderboardList.innerHTML = '<li class="loading" style="color:red;">Error loading scores.</li>'; } }
+            } catch (error) { console.error("Error during fetch leaderboard:", error.message); if (gameState === 'leaderboard') { leaderboardList.innerHTML = '<li class="loading" style="color:red;">Error loading scores.</li>'; } }
+        }
+        async function fetchUserHighScore() {
+            if (!username) { userHighScore = 0; highscoreDisplaySpan.textContent = 0; return; }
+            console.log(`Fetching HS for "${username}"...`); try { const data = await apiCall('/leaderboard', 'GET'); if (data.success && Array.isArray(data.scores)) { const userEntry = data.scores.find(e => e.username === username); userHighScore = userEntry ? userEntry.score : 0; console.log(`User HS fetched: ${userHighScore}`); } else { console.warn("Could not fetch high scores to determine user HS.", data?.message); userHighScore = 0; } } catch (error) { console.error("Error fetching leaderboard for HS:", error.message); userHighScore = 0; } highscoreDisplaySpan.textContent = userHighScore;
+        }
+        async function submitScore(newScore) {
+            if (!username) { console.warn("Cannot submit score, no user logged in."); return; }
+            console.log(`Submitting score: ${newScore} for ${username}`); try { const data = await apiCall('/score', 'POST', { username: username, score: newScore }); if (data.success) { console.log("Score submission successful:", data.message); if (gameState === 'leaderboard') { setTimeout(() => fetchLeaderboard(true), 500); } } else { console.error("Failed to submit score (API Error):", data.message || "Unknown error"); } } catch (error) { console.error("Error submitting score:", error.message); }
+        }
 
         // --- Initialization ---
         function init() {
-            console.log("Initializing game...");
-            // Set initial canvas background (just in case)
-            canvas.style.background = DEFAULT_CANVAS_BACKGROUND;
-            resizeCanvas();
-            checkAutoLogin();
-            console.log("Initialization complete.");
+            console.log("Initializing game..."); canvas.style.background = DEFAULT_CANVAS_BACKGROUND; resizeCanvas(); checkAutoLogin();
+            console.log("Initialization complete. Waiting for user action.");
         }
-        init(); // Start
+
+        // --- Start the Application ---
+        init();
 
     </script>
 </body>
